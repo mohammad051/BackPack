@@ -75,7 +75,7 @@ architecture, **verifies it against the published checksum**, installs it, and
 opens the menu:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/AminMGMT/BackPack/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/mohammad051/BackPack/main/install.sh)
 ```
 
 Reopen the menu any time with `sudo backpack`.
