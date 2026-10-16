@@ -10,6 +10,12 @@ Reference pages: what each part of Backpack **is**, and every setting it has.
   including the advanced Fine Tune settings
 - [Server layout (file locations)](server-layout.md)
 
+### Tunnel direction
+- [Direct tunnel — stream transports](direct-tunnel.md) — the `[direct]` engine, no longer offered by the wizard; the same forwarded ports, with Iran dialling
+  out instead of waiting to be dialled
+- [Direct tunnel](l3-direct-tunnel.md) — **what the wizard builds**: a private network between the two
+  servers, carrying whole IP packets (GRE/IPIP over a TUN device)
+
 ### Transports
 - [Transports — every one explained](transports.md)
 - [Choosing a transport (Link Test)](choosing-a-transport.md)

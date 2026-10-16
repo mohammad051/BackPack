@@ -205,6 +205,10 @@ func Serve() error {
 	mux.HandleFunc("/api/tunnel/suggest", srv.requireAuth(srv.handleTunnelSuggest))
 	mux.HandleFunc("/api/tunnel/defaults", srv.requireAuth(srv.handleTunnelDefaults))
 	mux.HandleFunc("/api/tunnel/create", srv.requireAuth(srv.handleTunnelCreate))
+	// The direct half, on its own endpoints so the reverse ones are untouched.
+	mux.HandleFunc("/api/direct/options", srv.requireAuth(srv.handleDirectOptions))
+	mux.HandleFunc("/api/direct/defaults", srv.requireAuth(srv.handleDirectDefaults))
+	mux.HandleFunc("/api/direct/create", srv.requireAuth(srv.handleDirectCreate))
 	mux.HandleFunc("/api/tunnel/settings", srv.requireAuth(srv.handleTunnelSettings))
 	mux.HandleFunc("/api/tunnel/edit", srv.requireAuth(srv.handleTunnelEdit))
 	mux.HandleFunc("/api/tunnel/action", srv.requireAuth(srv.handleTunnelAction))
@@ -261,11 +265,11 @@ func Serve() error {
 		ACMECacheDir: app.ConfigDir + "/acme",
 	}
 	if settings.ACMEDomain == "" {
-		host := cfg.TLSDomain
-		if host == "" {
-			host = manage.PublicIPv4()
-		}
-		certFile, keyFile, err := manage.EnsureSelfSignedCert("webui", host)
+		// EnsurePanelCert builds the SAN set from the machine's own interfaces
+		// (plus loopback, the public IP when reachable, and an optional operator
+		// host), so the certificate validates on whatever address the panel is
+		// reached on — not a single guess that is "-" on a filtered network.
+		certFile, keyFile, err := manage.EnsurePanelCert(cfg.TLSSelfHost)
 		if err != nil {
 			return fmt.Errorf("web panel certificate: %w", err)
 		}

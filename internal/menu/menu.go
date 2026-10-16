@@ -58,10 +58,13 @@ func Run() {
 		printMenu()
 
 		switch tui.Prompt("Select an option: ") {
+		// Both entries ask which direction the tunnel should be built in, and
+		// a reverse one is then built by exactly the code that has always
+		// built it. See manage.SetupIran.
 		case "1":
-			manage.SetupServer()
+			manage.SetupIran()
 		case "2":
-			manage.SetupClient()
+			manage.SetupKharej()
 		case "3":
 			manageMenu()
 		case "4":
@@ -101,8 +104,8 @@ func printUpdateBanner() {
 // printMenu renders the main menu: red numbers, white titles, gray descriptions.
 func printMenu() {
 	fmt.Println()
-	menuItem(1, "Setup Server", "Iran side — exposes ports to users")
-	menuItem(2, "Setup Client", "Kharej side — dials out to the Iran server")
+	menuItem(1, "Setup Iran", "the server your users connect to — it exposes the ports")
+	menuItem(2, "Setup Kharej", "the server abroad — it holds the real service")
 	menuItem(3, "Manage", "tunnels, ports, transport, status, health check")
 	menuItem(4, "Backup & Restore", "save or restore the full configuration")
 	menuItem(5, "Web Panel", "monitoring web UI — link, login code, port")
@@ -169,6 +172,7 @@ func manageMenu() {
 			{Title: "Status", Desc: "live tunnel table"},
 			{Title: "Health Check", Desc: "find problems and get a fix for each one"},
 			{Title: "Link Test", Desc: "measure the link and get a transport recommendation"},
+			{Title: "Speed Test", Desc: "measure what a full IP tunnel actually carries, end to end"},
 			{Title: "Game Latency Test", Desc: "estimate in-game ping to popular game servers through this exit"},
 			{Title: "Exit Health", Desc: "score & rank every server address, pin the healthiest (multi-exit failover)"},
 			{Title: "IP Spoofing Tester", Desc: "find which forged source IPs cross the firewall (for the spoof transport)"},
@@ -188,22 +192,24 @@ func manageMenu() {
 		case 3:
 			manage.LinkTest()
 		case 4:
-			manage.GameLatencyTest()
+			manage.SpeedTest()
 		case 5:
-			manage.ExitHealth()
+			manage.GameLatencyTest()
 		case 6:
-			manage.SpoofTest()
+			manage.ExitHealth()
 		case 7:
-			manage.TunnelMetrics()
+			manage.SpoofTest()
 		case 8:
+			manage.TunnelMetrics()
+		case 9:
 			ok, failed := manage.RestartAll()
 			tui.Success(fmt.Sprintf("Restarted %d tunnels (%d failed).", ok, failed))
 			tui.PressEnter()
-		case 9:
-			autoRefreshMenu()
 		case 10:
-			builtinProxyMenu()
+			autoRefreshMenu()
 		case 11:
+			builtinProxyMenu()
+		case 12:
 			manage.FileLocations()
 		default:
 			return

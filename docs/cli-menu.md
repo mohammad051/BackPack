@@ -16,8 +16,8 @@ long form. For *how to set a tunnel up*, use the
 
 | # | Option | What it does |
 |---|--------|--------------|
-| 1 | **Setup Server** | Create the **Iran-side** tunnel that exposes ports. Always build this first. |
-| 2 | **Setup Client** | Create the **kharej-side** tunnel that dials the Iran server and forwards to the real service. |
+| 1 | **Setup Iran** | Create the **Iran-side** tunnel that exposes ports. Asks the direction first — reverse or direct. |
+| 2 | **Setup Kharej** | Create the **kharej-side** tunnel that holds the real service. Asks the direction first. |
 | 3 | **Manage** | Everything about existing tunnels, plus the diagnostics. [↓](#3-manage) |
 | 4 | **Backup & Restore** | The whole configuration as one `.tar.gz`. [↓](#4-backup--restore) |
 | 5 | **Web Panel** | The monitoring dashboard — port, login, certificate. [↓](#5-web-panel) |
@@ -36,7 +36,11 @@ cached answer, so a slow or blocked GitHub never delays the menu.
 
 The questions, in the order they are asked. `[Y/n]` marks the default.
 
-### Setup Server (Iran)
+### Setup Iran
+
+Both setup entries ask **Reverse or Direct** before anything else. The table
+below is the reverse flow; the direct flow is much shorter and is listed after
+it.
 
 | Prompt | Notes |
 |---|---|
@@ -56,7 +60,29 @@ The questions, in the order they are asked. `[Y/n]` marks the default.
 | **Performance preset** | [Presets](performance-presets.md) |
 | **Fine-tune the advanced settings by hand** `[y/N]` | [↓ the advanced settings](#the-advanced-settings-fine-tune) |
 
-### Setup Client (kharej)
+### Setup Iran / Setup Kharej → Direct
+
+A direct tunnel is always a full IP tunnel wrapped in Backpack's own GRE, so
+there is nothing to choose about the shape or the framing — only how it travels.
+[Direct tunnel](l3-direct-tunnel.md)
+
+| Prompt | Notes |
+|---|---|
+| **How should the packets travel?** | **PCK** (looks like an ordinary TCP flow, no socket a firewall can hold), **UDP** (plain, where the path does not interfere), **Spoof** (forged source — test it on your route) |
+| **Kharej server address** | Iran side only. Iran dials out, so it needs no inbound port of its own |
+| **Tunnel port** | what kharej binds and Iran reaches |
+| **Private addresses** | the two ends of the tunnel's own subnet. A free `10.10.N.0/30` is suggested, so a second tunnel does not collide with the first |
+| **Tunnel name** | names the service and the config file |
+| **Security token** | suggested on the **kharej** side only, and pasted on the Iran side — offering one on both ends is how two different tokens happen |
+| **Ports to expose here** | Iran side only, optional. Without them the tunnel just routes |
+| **The Iran server's real IP** | spoof carrier, kharej side only: the peer forges every source, so this side has to be told where replies go |
+| **How should the tunnel be tuned?** | Turbo / Balance / Aggressive — the queue and the socket buffers. [Presets](performance-presets.md) |
+| **Fine-tune the advanced settings by hand** `[y/N]` | starting MTU, interface name, GRE key, segment cap, caps |
+
+The MTU is not a question worth agonising over: the tunnel measures the path
+once it is up and corrects the interface itself.
+
+### Setup Kharej
 
 | Prompt | Notes |
 |---|---|
@@ -86,6 +112,7 @@ The questions, in the order they are asked. `[Y/n]` marks the default.
 | **Status** | A live table of every tunnel: role, transport, state, uptime, traffic. |
 | **Health Check** | Tests the server, the panel and every tunnel, and prints a **fix** under each problem it finds. Start here when something is wrong. [More](health-check.md) |
 | **Link Test** | Measures the real route (latency, jitter, loss) and recommends a transport with matching timers. On a lossy link it names the exact FEC ratio and offers to apply it. [More](choosing-a-transport.md) |
+| **Speed Test** | Measures what a tunnel actually carries, end to end — encapsulation, encryption, carrier and path together. Needs both servers: start **Receive** on one, then **Send and measure** on the other, which is the side that reports. Link Test above measures how the path *behaves*; this measures how much it *moves*. Full IP tunnels only. |
 | **Game Latency Test** | Estimates the in-game ping a player would feel through this exit — pings the nearest edge of Dota 2, CS2, Valorant, PUBG, Fortnite and others from the kharej server, adds the tunnel leg, and rates the result. Endpoint list at `/etc/backpack/game-endpoints.list`. |
 | **Exit Health** | Scores and ranks every server address of a tunnel by `rtt + 2·jitter + 20·loss%`, and offers to pin the healthiest as the primary. The manual companion to health failover. |
 | **IP Spoofing Tester** | Two-node test that finds which forged source IPs actually cross the path. [More](ip-spoofing.md#the-ip-spoofing-tester) |
@@ -305,7 +332,7 @@ The shard counts must match on both ends. [More](../tutorial/udp-kcp-fec.md)
 
 **منوی Manage** علاوه بر مدیریت تونل‌ها این‌ها را دارد: **Status** (جدول زنده)،
 **Health Check** (مشکل را پیدا می‌کند و زیر هرکدام راه‌حل می‌نویسد — از اینجا
-شروع کن)، **Link Test** (مسیر را می‌سنجد و ترنسپورت و نسبت FEC پیشنهاد می‌دهد)،
+شروع کن)، **Link Test** (مسیر را می‌سنجد و ترنسپورت و نسبت FEC پیشنهاد می‌دهد)، **Speed Test** (اندازه می‌گیرد تونل واقعاً چقدر حجم رد می‌کند — روی یک سرور Receive و روی دیگری Send)،
 **Game Latency Test** (تخمین پینگ واقعی بازی از این خروجی)، **Exit Health**
 (امتیازدهی و رتبه‌بندی همهٔ آدرس‌های سرور)، **IP Spoofing Tester**،
 **Tunnel Metrics**، **Restart ALL**، **Auto Refresh**، **Built-in Proxy**

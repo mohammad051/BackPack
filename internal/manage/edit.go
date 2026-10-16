@@ -26,59 +26,59 @@ func loadServerSpec(name string) (TunnelSpec, error) {
 		return TunnelSpec{}, fmt.Errorf("%q is not a server tunnel", name)
 	}
 	return TunnelSpec{
-		Role:             "server",
-		Name:             name,
-		Transport:        string(sc.Transport),
-		BindAddr:         sc.BindAddr,
-		Token:            sc.Token,
-		ChannelSize:      sc.ChannelSize,
-		KeepAlive:        sc.Keepalive,
-		Nodelay:          sc.Nodelay,
-		Heartbeat:        sc.Heartbeat,
-		LogLevel:         sc.LogLevel,
-		LogFormat:        sc.LogFormat,
-		AcceptUDP:        sc.ForwardsUDP(),
-		Ports:            sc.Ports,
-		MSS:              sc.MSS,
-		SoRcvBuf:         sc.SO_RCVBUF,
-		SoSndBuf:         sc.SO_SNDBUF,
-		TLSCert:          sc.TLSCertFile,
-		TLSKey:           sc.TLSKeyFile,
-		ACMEDomain:       sc.ACMEDomain,
-		ACMEEmail:        sc.ACMEEmail,
-		SimpleAuth:       sc.SimpleAuth,
-		MuxCon:           sc.MuxCon,
-		MuxVersion:       sc.MuxVersion,
-		ZeroCopy:         sc.ZeroCopy,
-		MuxFrameSize:     sc.MaxFrameSize,
-		MuxRecvBuffer:    sc.MaxReceiveBuffer,
-		MuxStreamBuffer:  sc.MaxStreamBuffer,
-		Sniffer:          sc.Sniffer,
-		WebPort:          sc.WebPort,
-		WebBind:          sc.WebBind,
-		ProxyProtocol:    sc.ProxyProtocol,
-		MaxConnections:   sc.MaxConnections,
-		BandwidthMbps:    sc.BandwidthMbps,
-		Preset:           sc.Preset,
-		KCPMTU:           sc.MTU,
-		KCPInterval:      sc.Interval,
-		KCPResend:        sc.Resend,
-		KCPNoDelay:       sc.NoDelay,
-		KCPNoCongestion:  sc.NoCongestion,
-		KCPSndWnd:        sc.SndWnd,
-		KCPRcvWnd:        sc.RcvWnd,
-		KCPAckNoDelay:    sc.AckNoDelay,
-		KCPDataShards:    sc.DataShards,
-		KCPParityShards:  sc.ParityShards,
-		SpoofProfile:     sc.SpoofProfile,
-		SpoofUplink:      sc.SpoofUplink,
-		SpoofDownlink:    sc.SpoofDownlink,
-		SpoofSrcIP:       sc.SpoofSrcIP,
-		SpoofSrcPool:     sc.SpoofSrcPool,
-		SpoofPeerIP:      sc.SpoofPeerIP,
-		SpoofDstIP:       sc.SpoofDstIP,
-		SpoofInterface:   sc.SpoofInterface,
-		SpoofXDPIface:    sc.SpoofXDPInterface,
+		Role:            "server",
+		Name:            name,
+		Transport:       string(sc.Transport),
+		BindAddr:        sc.BindAddr,
+		Token:           sc.Token,
+		ChannelSize:     sc.ChannelSize,
+		KeepAlive:       sc.Keepalive,
+		Nodelay:         sc.Nodelay,
+		Heartbeat:       sc.Heartbeat,
+		LogLevel:        sc.LogLevel,
+		LogFormat:       sc.LogFormat,
+		AcceptUDP:       sc.ForwardsUDP(),
+		Ports:           sc.Ports,
+		MSS:             sc.MSS,
+		SoRcvBuf:        sc.SO_RCVBUF,
+		SoSndBuf:        sc.SO_SNDBUF,
+		TLSCert:         sc.TLSCertFile,
+		TLSKey:          sc.TLSKeyFile,
+		ACMEDomain:      sc.ACMEDomain,
+		ACMEEmail:       sc.ACMEEmail,
+		SimpleAuth:      sc.SimpleAuth,
+		MuxCon:          sc.MuxCon,
+		MuxVersion:      sc.MuxVersion,
+		ZeroCopy:        sc.ZeroCopy,
+		MuxFrameSize:    sc.MaxFrameSize,
+		MuxRecvBuffer:   sc.MaxReceiveBuffer,
+		MuxStreamBuffer: sc.MaxStreamBuffer,
+		Sniffer:         sc.Sniffer,
+		WebPort:         sc.WebPort,
+		WebBind:         sc.WebBind,
+		ProxyProtocol:   sc.ProxyProtocol,
+		MaxConnections:  sc.MaxConnections,
+		BandwidthMbps:   sc.BandwidthMbps,
+		Preset:          sc.Preset,
+		KCPMTU:          sc.MTU,
+		KCPInterval:     sc.Interval,
+		KCPResend:       sc.Resend,
+		KCPNoDelay:      sc.NoDelay,
+		KCPNoCongestion: sc.NoCongestion,
+		KCPSndWnd:       sc.SndWnd,
+		KCPRcvWnd:       sc.RcvWnd,
+		KCPAckNoDelay:   sc.AckNoDelay,
+		KCPDataShards:   sc.DataShards,
+		KCPParityShards: sc.ParityShards,
+		SpoofProfile:    sc.SpoofProfile,
+		SpoofUplink:     sc.SpoofUplink,
+		SpoofDownlink:   sc.SpoofDownlink,
+		SpoofSrcIP:      sc.SpoofSrcIP,
+		SpoofSrcPool:    sc.SpoofSrcPool,
+		SpoofPeerIP:     sc.SpoofPeerIP,
+		SpoofDstIP:      sc.SpoofDstIP,
+		SpoofInterface:  sc.SpoofInterface,
+		SpoofXDPIface:   sc.SpoofXDPInterface,
 		// Resolve through the config helpers so a tunnel saved with the new
 		// spoof_mode/spoof_forward keys, or the legacy spoof_pipe pair, both load
 		// back as relay mode with the right forward target.
@@ -460,30 +460,6 @@ func SetLoadBalance(name string, on bool) error {
 	// failover steering.
 	if on {
 		s.HealthFailover = false
-	}
-	return applySpec(s)
-}
-
-// SetHealthFailover turns automatic health-scored failover on or off for a
-// client tunnel. It measures every configured address and keeps traffic on the
-// healthiest, so it needs a backup address to have anything to fail over to.
-func SetHealthFailover(name string, on bool) error {
-	s, err := LoadSpec(name)
-	if err != nil {
-		return err
-	}
-	if s.Role != "client" {
-		return fmt.Errorf("failover is a client-side setting")
-	}
-	if on && len(s.FallbackAddrs) == 0 {
-		return fmt.Errorf("add at least one backup server address first — there is nothing to fail over to")
-	}
-	if s.HealthFailover == on {
-		return fmt.Errorf("automatic failover is already %s", map[bool]string{true: "on", false: "off"}[on])
-	}
-	s.HealthFailover = on
-	if on {
-		s.LoadBalance = false // steering overrides spread
 	}
 	return applySpec(s)
 }
